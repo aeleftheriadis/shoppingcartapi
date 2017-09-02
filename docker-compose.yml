@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  shoppingcardapi:
+    image: shoppingcardapi
+    build:
+      context: ./ShoppingCardApi
+      dockerfile: Dockerfile

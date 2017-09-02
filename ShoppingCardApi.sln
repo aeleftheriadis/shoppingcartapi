@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCardApi", "ShoppingCardApi\ShoppingCardApi.csproj", "{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B5A231E-A1A4-4B1F-8542-F86E41B5B048}
+	EndGlobalSection
+EndGlobal
