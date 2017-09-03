@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCardApi", "ShoppingCardApi\ShoppingCardApi.csproj", "{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShoppingCartApi", "ShoppingCartApi\ShoppingCartApi.csproj", "{B2D66F72-F544-4C2F-9EDA-080CA51E59C5}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CA97630-971C-4ED1-970C-9B75E8CF4DBC}"
 EndProject

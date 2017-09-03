@@ -1,8 +1,14 @@
 version: '3'
 
 services:
-  shoppingcardapi:
-    image: shoppingcardapi
+  shoppingcartapi:
+    image: shoppingcartapi
     build:
-      context: ./ShoppingCardApi
+      context: ./ShoppingCartApi
       dockerfile: Dockerfile
+    depends_on:
+      - shoppingcart.data
+  shoppingcart.data:
+    image: redis
+    ports:
+      - "6379:6379"
