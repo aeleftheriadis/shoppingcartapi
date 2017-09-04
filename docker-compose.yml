@@ -3,6 +3,8 @@ version: '3'
 services:
   shoppingcartapi:
     image: shoppingcartapi
+    environment:
+      - ConnectionString=shoppingcart.data
     build:
       context: ./ShoppingCartApi
       dockerfile: Dockerfile
@@ -10,5 +12,3 @@ services:
       - shoppingcart.data
   shoppingcart.data:
     image: redis
-    ports:
-      - "6379:6379"

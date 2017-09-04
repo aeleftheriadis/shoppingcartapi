@@ -48,7 +48,7 @@ namespace ShoppingCartApi.Controllers
 
         [Route("checkout")]
         [HttpPost]
-        public async Task<IActionResult> Checkout([FromBody]Order order, [FromBody]Customer customer)
+        public async Task<IActionResult> Checkout([FromBody]Order order)
         {
             //var userId = _identitySvc.GetUserIdentity();
             order.Id = Guid.NewGuid();
@@ -60,30 +60,30 @@ namespace ShoppingCartApi.Controllers
             }
             order.Date = DateTime.Now;
 
-            if (customer.Type == CustomerType.Silver)
-                order.Amount = order.Amount * (decimal)0.98;
-            else if(customer.Type == CustomerType.Silver)
-                order.Amount = order.Amount * (decimal)0.97;
+            //if (customer.Type == CustomerType.Silver)
+            //    order.Amount = order.Amount * (decimal)0.98;
+            //else if(customer.Type == CustomerType.Silver)
+            //    order.Amount = order.Amount * (decimal)0.97;
 
-            //In order to update the customer I have to retrieve all orders for the past 12 months included the one above
-            //from other part of this application since I don't persist the order in this part of the app
+            ////In order to update the customer I have to retrieve all orders for the past 12 months included the one above
+            ////from other part of this application since I don't persist the order in this part of the app
 
-            var orderLine = new OrderLine()
-            {
-                OrderId = order.Id,
-                Products = shoppingCart.Products
-            };
+            //var orderLine = new OrderLine()
+            //{
+            //    OrderId = order.Id,
+            //    Products = shoppingCart.Products
+            //};
 
-            if(!_paymentProvider.Authorize(customer.Name, order.Amount))
-            {
-                return BadRequest();
-            }
+            //if(!_paymentProvider.Authorize(customer.Name, order.Amount))
+            //{
+            //    return BadRequest();
+            //}
 
-            //Notify customer
-            await _notificationProvider.SendEmailAsync(customer.Email, $"Order {order.Id} is placed","Thank you for your order");
+            ////Notify customer
+            //await _notificationProvider.SendEmailAsync(customer.Email, $"Order {order.Id} is placed","Thank you for your order");
 
-            //Notify courier
-            await _notificationProvider.SendEmailAsync("courier@localhost", $"Order {order.Id} is placed", $"The order will be send to {order.Address}");
+            ////Notify courier
+            //await _notificationProvider.SendEmailAsync("courier@localhost", $"Order {order.Id} is placed", $"The order will be send to {order.Address}");
 
             return Ok(order);
         }

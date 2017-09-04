@@ -8,5 +8,6 @@ namespace ShoppingCartApi
     public class ShoppingCartSettings
     {
         public string ConnectionString { get; set; }
+        public string SecretKey { get; set; }
     }
 }

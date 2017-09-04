@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using ShoppingCartApi.Infastructure.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Http;
 using ShoppingCartApi.Model;
@@ -20,6 +19,8 @@ using ShoppingCartApi.Services.Implementations;
 using ShoppingCartApi.Services.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ShoppingCartApi.Middlewares;
+using ShoppingCartApi.Infastructure.Filters;
 
 namespace ShoppingCartApi
 {
@@ -41,10 +42,7 @@ namespace ShoppingCartApi
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc(options =>
-            {
-                options.Filters.Add(typeof(HttpGlobalExceptionFilter));
-            }).AddControllersAsServices();
+            
 
             services.Configure<ShoppingCartSettings>(Configuration);
     
@@ -61,25 +59,13 @@ namespace ShoppingCartApi
             {
                 options.DescribeAllEnumsAsStrings();
                 options.SwaggerDoc("v1", new Info
-                {
+                {   
                     Title = "ShoppingCart HTTP API",
                     Version = "v1",
                     Description = "The ShoppingCart Service HTTP API",
                     TermsOfService = "Terms Of Service"
                 });
-
-                options.AddSecurityDefinition("oauth2", new OAuth2Scheme
-                {
-                    Type = "oauth2",
-                    Flow = "implicit",
-                    AuthorizationUrl = "localhost",
-                    TokenUrl = "localhost/token",
-                    Scopes = new Dictionary<string, string>()
-                    {
-                        { "shoppingcart", "Shopping Cart API" }
-                    }
-                });
-                options.OperationFilter<AuthorizeCheckOperationFilter>();
+                options.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
             });
 
             services.AddCors(options =>
@@ -97,7 +83,7 @@ namespace ShoppingCartApi
             services.AddTransient<INotificationProvider, EmailNotificationProvider>();
 
             services.AddOptions();
-
+            services.AddMvc();
             var container = new ContainerBuilder();
             container.Populate(services);
             return new AutofacServiceProvider(container.Build());
@@ -111,25 +97,53 @@ namespace ShoppingCartApi
 
             app.UseCors("CorsPolicy");
             app.UseMvcWithDefaultRoute();
+            app.UseStaticFiles();
 
-            app.UseSwagger().UseSwaggerUI(c =>
+            // Add JWT generation endpoint:
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("SecretKey").Value));
+            var options = new TokenProviderOptions
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My ShoppingCartApi V1");
-                c.ConfigureOAuth2("shoppingcartswaggerui", "", "", "Shopping Cart Swagger UI");
-            });
+                Audience = "localhost",
+                Issuer = "localhost",
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+            };
+
+            app.UseMiddleware<TokenProviderMiddleware>(Options.Create(options));
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                // The signing key must match!
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = signingKey,
+
+                // Validate the JWT Issuer (iss) claim
+                ValidateIssuer = true,
+                ValidIssuer = "localhost",
+
+                // Validate the JWT Audience (aud) claim
+                ValidateAudience = true,
+                ValidAudience = "localhost",
+
+                // Validate the token expiry
+                ValidateLifetime = true,
+
+                // If you want to allow a certain amount of clock drift, set that here:
+                ClockSkew = TimeSpan.Zero
+            };
 
             app.UseJwtBearerAuthentication(new JwtBearerOptions
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
-                TokenValidationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("7x!A%D*G-KaPdSgU")),
-                    ValidAudience = "localhost",
-                    ValidateIssuerSigningKey = true,
-                    ValidateLifetime = true,
-                    ValidIssuer = "localhost"
-                }
+                TokenValidationParameters = tokenValidationParameters
+            });
+
+            app.UseSwagger().UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My ShoppingCartApi V1");
+                c.InjectOnCompleteJavaScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"); // https://cdnjs.com/libraries/crypto-js
+                c.InjectOnCompleteJavaScript("/swagger-ui/authorization2.js");
+                //c.ConfigureOAuth2("shoppingcartswaggerui", "", "", "Shopping Cart Swagger UI");
             });
         }
     }
