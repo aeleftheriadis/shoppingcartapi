@@ -10,8 +10,14 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - shoppingcart.data
-      - sql.data
+      - shoppingcartsql.data
   shoppingcart.data:
     image: redis
-  sql.data:
+  shoppingcartsql.data:
     image: microsoft/mssql-server-linux
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "5434:1433"
+

@@ -15,16 +15,17 @@ namespace ShoppingCartApi.Services.Abstractions
             var emailMessage = new MimeMessage();
 
             emailMessage.From.Add(new MailboxAddress("Athanasios Eleftheriadis", "test@localhost"));
-            emailMessage.To.Add(new MailboxAddress("", email));
+            emailMessage.To.Add(new MailboxAddress("Athanasios Eleftheriadis", email));
             emailMessage.Subject = subject;
             emailMessage.Body = new TextPart("plain") { Text = message };
 
             using (var client = new SmtpClient())
             {
-                client.LocalDomain = "localhost";
-                await client.ConnectAsync("localhost", 25, SecureSocketOptions.None).ConfigureAwait(false);
-                await client.SendAsync(emailMessage).ConfigureAwait(false);
-                await client.DisconnectAsync(true).ConfigureAwait(false);
+                //needs a proper smtp server
+                //client.LocalDomain = "localhost";
+                //await client.ConnectAsync("localhost", 25, SecureSocketOptions.None).ConfigureAwait(false);
+                //await client.SendAsync(emailMessage).ConfigureAwait(false);
+                // client.DisconnectAsync(true).ConfigureAwait(false);
             }
         }
     }

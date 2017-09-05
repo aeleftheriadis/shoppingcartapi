@@ -19,6 +19,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ShoppingCartApi.Middlewares;
 using ShoppingCartApi.Infastructure.Filters;
+using ShoppingCartApi.Infastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Reflection;
+using System.Data.SqlClient;
+using Polly;
 
 namespace ShoppingCartApi
 {
@@ -81,6 +87,24 @@ namespace ShoppingCartApi
             services.AddTransient<INotificationProvider, EmailNotificationProvider>();
 
             services.AddOptions();
+
+            services.AddDbContext<ShoppingCartContext>(opt => opt.UseInMemoryDatabase());
+
+            //services.AddDbContext<ShoppingCartContext>(options =>
+            //{
+            //    options.UseSqlServer(Configuration["DBConnectionString"],
+            //    sqlServerOptionsAction: sqlOptions =>
+            //    {
+            //        sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+            //        sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+            //    });
+
+            //    // Changing default behavior when client evaluation occurs to throw. 
+            //    // Default in EF Core would be to log a warning when client evaluation is performed.
+            //    options.ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
+            //    //Check Client vs. Server evaluation: https://docs.microsoft.com/en-us/ef/core/querying/client-eval
+            //});
+
             services.AddMvc();
         }
 
@@ -134,13 +158,38 @@ namespace ShoppingCartApi
             app.UseSwagger().UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My ShoppingCartApi V1");
-                //c.InjectOnCompleteJavaScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"); // https://cdnjs.com/libraries/crypto-js
-                //c.InjectOnCompleteJavaScript("/swagger-ui/authorization2.js");
-                //c.ConfigureOAuth2("shoppingcartswaggerui", "", "", "Shopping Cart Swagger UI");
             });
+
+            var context = (ShoppingCartContext)app
+            .ApplicationServices.GetService(typeof(ShoppingCartContext));
+
+            WaitForSqlAvailabilityAsync(context, loggerFactory, app, env).Wait();
 
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();            
+        }
+
+        private async Task WaitForSqlAvailabilityAsync(ShoppingCartContext ctx, ILoggerFactory loggerFactory, IApplicationBuilder app, IHostingEnvironment env, int retries = 0)
+        {
+            var logger = loggerFactory.CreateLogger(nameof(Startup));
+            var policy = CreatePolicy(retries, logger, nameof(WaitForSqlAvailabilityAsync));
+            await policy.ExecuteAsync(async () =>
+            {
+                await ShoppingCartContextSeed.SeedAsync(app, env, loggerFactory);
+            });
+        }
+
+        private Policy CreatePolicy(int retries, ILogger logger, string prefix)
+        {
+            return Policy.Handle<SqlException>().
+                WaitAndRetryAsync(
+                    retryCount: retries,
+                    sleepDurationProvider: retry => TimeSpan.FromSeconds(5),
+                    onRetry: (exception, timeSpan, retry, ctx) =>
+                    {
+                        logger.LogTrace($"[{prefix}] Exception {exception.GetType().Name} with message ${exception.Message} detected on attempt {retry} of {retries}");
+                    }
+                );
         }
     }
 }

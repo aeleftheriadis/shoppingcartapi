@@ -8,6 +8,7 @@ namespace ShoppingCartApi.Model
 {
     public class OrderLine
     {
+        [Key]
         public Guid OrderId { get; set; }
         public List<Product> Products { get; set; }
     }

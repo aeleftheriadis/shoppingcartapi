@@ -8,6 +8,7 @@ namespace ShoppingCartApi.Model
 {
     public class Product
     {
+        [Key]
         public string Code { get; set; }
         public string Description { get; set; }
         [Range(0, double.MaxValue)]

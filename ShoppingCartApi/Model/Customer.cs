@@ -8,6 +8,7 @@ namespace ShoppingCartApi.Model
 {
     public class Customer
     {
+        [Key]
         public string Name { get; set; }
         public CustomerType Type { get; set; } = CustomerType.Standard;
         public string Address { get; set; }
