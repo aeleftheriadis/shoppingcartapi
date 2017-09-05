@@ -10,7 +10,7 @@ using ShoppingCartApi.Services;
 namespace ShoppingCartApi.Controllers
 {
     [Route("api/v1/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class ShoppingCartController : Controller
     {
         private readonly IShoppingCartRepository _repository;
@@ -29,7 +29,7 @@ namespace ShoppingCartApi.Controllers
             //_eventBus = eventBus;
         }
         // GET /id
-        [HttpGet("{id}")]
+        [HttpGet]
         public async Task<IActionResult> Get(string customer)
         {
             var shoppingCart = await _repository.GetShoppingCartAsync(customer);

@@ -10,5 +10,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - shoppingcart.data
+      - sql.data
   shoppingcart.data:
     image: redis
+  sql.data:
+    image: microsoft/mssql-server-linux

@@ -12,8 +12,6 @@ using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Http;
 using ShoppingCartApi.Model;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using ShoppingCartApi.Services;
 using ShoppingCartApi.Services.Implementations;
 using ShoppingCartApi.Services.Abstractions;
@@ -39,7 +37,7 @@ namespace ShoppingCartApi
         public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
             
@@ -84,9 +82,6 @@ namespace ShoppingCartApi
 
             services.AddOptions();
             services.AddMvc();
-            var container = new ContainerBuilder();
-            container.Populate(services);
-            return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,15 +91,13 @@ namespace ShoppingCartApi
             loggerFactory.AddDebug();
 
             app.UseCors("CorsPolicy");
-            app.UseMvcWithDefaultRoute();
-            app.UseStaticFiles();
 
             // Add JWT generation endpoint:
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("SecretKey").Value));
             var options = new TokenProviderOptions
             {
-                Audience = "localhost",
-                Issuer = "localhost",
+                Audience = "ShoppingApiAudience",
+                Issuer = "ShoppingApiIssuer",
                 SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
             };
 
@@ -118,11 +111,11 @@ namespace ShoppingCartApi
 
                 // Validate the JWT Issuer (iss) claim
                 ValidateIssuer = true,
-                ValidIssuer = "localhost",
+                ValidIssuer = "ShoppingApiIssuer",
 
                 // Validate the JWT Audience (aud) claim
                 ValidateAudience = true,
-                ValidAudience = "localhost",
+                ValidAudience = "ShoppingApiAudience",
 
                 // Validate the token expiry
                 ValidateLifetime = true,
@@ -141,10 +134,13 @@ namespace ShoppingCartApi
             app.UseSwagger().UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My ShoppingCartApi V1");
-                c.InjectOnCompleteJavaScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"); // https://cdnjs.com/libraries/crypto-js
-                c.InjectOnCompleteJavaScript("/swagger-ui/authorization2.js");
+                //c.InjectOnCompleteJavaScript("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"); // https://cdnjs.com/libraries/crypto-js
+                //c.InjectOnCompleteJavaScript("/swagger-ui/authorization2.js");
                 //c.ConfigureOAuth2("shoppingcartswaggerui", "", "", "Shopping Cart Swagger UI");
             });
+
+            app.UseStaticFiles();
+            app.UseMvcWithDefaultRoute();            
         }
     }
 }

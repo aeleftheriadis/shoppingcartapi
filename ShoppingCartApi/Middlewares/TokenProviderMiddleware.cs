@@ -15,19 +15,13 @@ namespace ShoppingCartApi.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly TokenProviderOptions _options;
-        //private readonly IMongoRepository _repository = null;
-        //private readonly IEncryptionService _encryptionService = null;
 
         public TokenProviderMiddleware(
             RequestDelegate next,
             IOptions<TokenProviderOptions> options)
-            //IMongoRepository repository,
-            //IEncryptionService encyptionService)
         {
             _next = next;
             _options = options.Value;
-            //_repository = repository;
-            //_encryptionService = encyptionService;
         }
 
         public Task Invoke(HttpContext context)
